@@ -7,13 +7,12 @@
     treefmt-nix.url = "github:numtide/treefmt-nix";
     treefmt-nix.inputs.nixpkgs.follows = "nixpkgs";
 
-    # Each template is also wired up as a path input so that `nix flake
-    # check` evaluates its outputs (and builds the current-system
-    # default) — see `checks.<system>.template-*` below. Templates still
-    # work as plain `nix flake init` targets; this input is only there
-    # to give CI something to chew on.
+    # for `nix flake check` on the subflakes
     template-default.url = "path:./default";
     template-default.inputs.nixpkgs.follows = "nixpkgs";
+
+    template-docker-image.url = "path:./docker-image";
+    template-docker-image.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
@@ -30,12 +29,41 @@
         builtins.foldl' (
           a: s: a // builtins.mapAttrs (k: v: (a.${k} or { }) // { ${s} = v; }) (f s)
         ) { } systems;
+
+      inherit (inputs.nixpkgs) lib;
+
+      # Every flake input named `template-<name>` is treated as a
+      # template sub-flake whose `packages` and `checks` we re-expose
+      # under `checks.<system>.<name>-<attr>`. Templates that don't
+      # support a system contribute no attributes there (the `or {}`
+      # fallbacks), so making a template platform-specific needs no
+      # extra wiring. The `default` package is skipped because by
+      # convention it aliases one of the named packages — checking it
+      # again would just rebuild the same derivation under a second
+      # name.
+      templateInputs = lib.filterAttrs (n: _: lib.hasPrefix "template-" n) inputs;
+
+      templateChecksFor =
+        system:
+        lib.concatMapAttrs (
+          inputName: input:
+          let
+            name = lib.removePrefix "template-" inputName;
+            pkgs = lib.filterAttrs (n: _: n != "default") (input.packages.${system} or { });
+            checks = input.checks.${system} or { };
+          in
+          lib.mapAttrs' (k: v: lib.nameValuePair "${name}-${k}" v) (pkgs // checks)
+        ) templateInputs;
     in
     {
       templates = {
         default = {
           path = ./default;
           description = "Minimal starter flake for a multi-system Nix project (eachSystem style)";
+        };
+        docker-image = {
+          path = ./docker-image;
+          description = "Starter flake for OCI images — plain and musl-static hello, with a NixOS integration test";
         };
       };
     }
@@ -61,8 +89,8 @@
 
         checks = {
           formatting = treefmt.config.build.check inputs.self;
-          template-default = inputs.template-default.packages.${system}.default;
-        };
+        }
+        // templateChecksFor system;
       }
     );
 }

@@ -6,9 +6,10 @@ kept in one repository so they can be initialised with a single
 
 ## Available templates
 
-| Name      | Description                                                                                                                                                                                                                                   |
-| --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `default` | Minimal starter flake for a multi-system project. Targets `x86_64-linux`, `aarch64-linux` and `aarch64-darwin` using the `eachSystem` style and tracks `nixos-unstable`. Ships with a placeholder `hello` package — swap it out for your own. |
+| Name           | Description                                                                                                                                                                                                                                                                                                                                                           |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `default`      | Minimal starter flake for a multi-system project. Targets `x86_64-linux`, `aarch64-linux` and `aarch64-darwin` using the `eachSystem` style and tracks `nixos-unstable`. Ships with a placeholder `hello` package — swap it out for your own.                                                                                                                         |
+| `docker-image` | Starter flake for [argunix](https://argunix.nix-consulting.net)-compatible OCI images. Linux-only (`x86_64-linux`, `aarch64-linux`). Defines the same `hello` image twice — once against glibc, once musl-static — to demonstrate how small Nix-built images can get. Comes with a NixOS-VM integration test (`docker load` + `docker run`), gated to `x86_64-linux`. |
 
 ## Usage
 
