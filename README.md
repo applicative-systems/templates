@@ -60,10 +60,22 @@ nix flake check
 The configured formatters/linters are `nixfmt`, `deadnix`, `statix`,
 `prettier`, `shellcheck` and `shfmt`.
 
+## How templates are validated
+
+Each template is wired up as a `path:` flake input on the top-level
+`flake.nix` (with `inputs.nixpkgs.follows = "nixpkgs"` to dedupe). Its
+default package is then re-exported under `checks.<system>.template-<name>`,
+so `nix flake check` evaluates the template's outputs for every supported
+system and builds the host-system one. End users initialising the template
+via `nix flake init` are unaffected — they get a clean tree without any
+parent lockfile baggage.
+
 ## Adding a new template
 
 1. Create a new sub-directory containing a `flake.nix` (and any supporting
    files).
 2. Register it in the top-level `flake.nix` under `templates.<name>` with a
    `path` and a `description`.
-3. Document it in the table above.
+3. Wire it up for CI by adding a `template-<name>` input pointing at the
+   sub-directory and a matching `checks.<system>.template-<name>` entry.
+4. Document it in the table above.

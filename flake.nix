@@ -6,6 +6,14 @@
 
     treefmt-nix.url = "github:numtide/treefmt-nix";
     treefmt-nix.inputs.nixpkgs.follows = "nixpkgs";
+
+    # Each template is also wired up as a path input so that `nix flake
+    # check` evaluates its outputs (and builds the current-system
+    # default) — see `checks.<system>.template-*` below. Templates still
+    # work as plain `nix flake init` targets; this input is only there
+    # to give CI something to chew on.
+    template-default.url = "path:./default";
+    template-default.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
@@ -51,7 +59,10 @@
       {
         formatter = treefmt.config.build.wrapper;
 
-        checks.formatting = treefmt.config.build.check inputs.self;
+        checks = {
+          formatting = treefmt.config.build.check inputs.self;
+          template-default = inputs.template-default.packages.${system}.default;
+        };
       }
     );
 }

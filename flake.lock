@@ -19,8 +19,25 @@
     "root": {
       "inputs": {
         "nixpkgs": "nixpkgs",
+        "template-default": "template-default",
         "treefmt-nix": "treefmt-nix"
       }
+    },
+    "template-default": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "path": "./default",
+        "type": "path"
+      },
+      "original": {
+        "path": "./default",
+        "type": "path"
+      },
+      "parent": []
     },
     "treefmt-nix": {
       "inputs": {
