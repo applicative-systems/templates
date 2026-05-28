@@ -33,14 +33,15 @@
       inherit (inputs.nixpkgs) lib;
 
       # Every flake input named `template-<name>` is treated as a
-      # template sub-flake whose `packages` and `checks` we re-expose
-      # under `checks.<system>.<name>-<attr>`. Templates that don't
-      # support a system contribute no attributes there (the `or {}`
-      # fallbacks), so making a template platform-specific needs no
-      # extra wiring. The `default` package is skipped because by
-      # convention it aliases one of the named packages — checking it
-      # again would just rebuild the same derivation under a second
-      # name.
+      # template sub-flake whose `packages`, `checks` and `devShells`
+      # we re-expose under `checks.<system>.<name>-<attr>`. Templates
+      # that don't support a system contribute no attributes there
+      # (the `or {}` fallbacks), so making a template platform-specific
+      # needs no extra wiring. The `default` package is skipped because
+      # by convention it aliases one of the named packages — checking
+      # it again would just rebuild the same derivation under a second
+      # name. `default` is kept for devShells (it's the primary shell,
+      # not an alias).
       templateInputs = lib.filterAttrs (n: _: lib.hasPrefix "template-" n) inputs;
 
       templateChecksFor =
@@ -51,8 +52,9 @@
             name = lib.removePrefix "template-" inputName;
             pkgs = lib.filterAttrs (n: _: n != "default") (input.packages.${system} or { });
             checks = input.checks.${system} or { };
+            devShells = input.devShells.${system} or { };
           in
-          lib.mapAttrs' (k: v: lib.nameValuePair "${name}-${k}" v) (pkgs // checks)
+          lib.mapAttrs' (k: v: lib.nameValuePair "${name}-${k}" v) (pkgs // checks // devShells)
         ) templateInputs;
     in
     {

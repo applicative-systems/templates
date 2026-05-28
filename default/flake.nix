@@ -1,5 +1,5 @@
 {
-  description = "Minimal starter flake — replace the example `hello` package with your own";
+  description = "Minimal starter flake";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
@@ -29,6 +29,20 @@
         packages = {
           default = pkgs.hello;
           inherit (pkgs) hello;
+        };
+
+        devShells.default = pkgs.mkShell {
+          inputsFrom = [ inputs.self.packages.${system}.default ];
+
+          packages = with pkgs; [
+            jq
+            ripgrep
+          ];
+
+          shellHook = ''
+            # set any env variable if needed
+            export EXAMPLE_ENV=123
+          '';
         };
       }
     );
