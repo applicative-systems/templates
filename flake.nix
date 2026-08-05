@@ -4,9 +4,6 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
-    treefmt-nix.url = "github:numtide/treefmt-nix";
-    treefmt-nix.inputs.nixpkgs.follows = "nixpkgs";
-
     # for `nix flake check` on the subflakes
     template-default.url = "path:./default";
     template-default.inputs.nixpkgs.follows = "nixpkgs";
@@ -80,24 +77,67 @@
       system:
       let
         pkgs = import inputs.nixpkgs { inherit system; };
-
-        treefmt = inputs.treefmt-nix.lib.evalModule pkgs {
-          projectRootFile = "flake.nix";
-          programs = {
-            nixfmt.enable = true;
-            deadnix.enable = true;
-            statix.enable = true;
-            prettier.enable = true;
-            shellcheck.enable = true;
-            shfmt.enable = true;
-          };
-        };
       in
       {
-        formatter = treefmt.config.build.wrapper;
+        formatter = pkgs.treefmt.withConfig {
+          settings = {
+            tree-root-file = "flake.nix";
+            on-unmatched = "info";
+            formatter = {
+              nixfmt = {
+                command = lib.getExe pkgs.nixfmt;
+                includes = [ "*.nix" ];
+              };
+              statix = {
+                command = lib.getExe pkgs.statix;
+                options = [ "fix" ];
+                no-positional-arg-support = true;
+                includes = [ "*.nix" ];
+              };
+              deadnix = {
+                command = lib.getExe pkgs.deadnix;
+                options = [ "--edit" ];
+                includes = [ "*.nix" ];
+              };
+              prettier = {
+                command = lib.getExe pkgs.prettier;
+                options = [ "--write" ];
+                includes = [
+                  "*.css"
+                  "*.html"
+                  "*.js"
+                  "*.json"
+                  "*.md"
+                  "*.yaml"
+                  "*.yml"
+                ];
+              };
+              shellcheck = {
+                command = lib.getExe pkgs.shellcheck;
+                includes = [
+                  "*.sh"
+                  "*.bash"
+                ];
+              };
+              shfmt = {
+                command = lib.getExe pkgs.shfmt;
+                options = [
+                  "-w"
+                  "-i"
+                  "2"
+                  "-s"
+                ];
+                includes = [
+                  "*.sh"
+                  "*.bash"
+                ];
+              };
+            };
+          };
+        };
 
         checks = {
-          formatting = treefmt.config.build.check inputs.self;
+          formatting = inputs.self.formatter.${system}.check inputs.self;
         }
         // templateChecksFor system;
       }

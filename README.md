@@ -46,8 +46,9 @@ nix build .#packages.aarch64-linux.default
 
 ## Formatting and linting
 
-This repository is wired up with [treefmt-nix](https://github.com/numtide/treefmt-nix).
-Format everything in place:
+This repository is wired up with [treefmt](https://github.com/numtide/treefmt),
+configured directly in `flake.nix` via `pkgs.treefmt.withConfig` (no extra
+flake input needed). Format everything in place:
 
 ```sh
 nix fmt
