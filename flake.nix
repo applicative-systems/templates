@@ -13,6 +13,9 @@
 
     template-docker-image.url = "path:./docker-image";
     template-docker-image.inputs.nixpkgs.follows = "nixpkgs";
+
+    template-minimal.url = "path:./minimal";
+    template-minimal.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
@@ -66,6 +69,10 @@
         docker-image = {
           path = ./docker-image;
           description = "Starter flake for OCI images — plain and musl-static hello, with a NixOS integration test";
+        };
+        minimal = {
+          path = ./minimal;
+          description = "Smallest possible starter flake — packages for every nixpkgs system via mapAttrs over legacyPackages";
         };
       };
     }

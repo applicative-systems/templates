@@ -21,6 +21,7 @@
         "nixpkgs": "nixpkgs",
         "template-default": "template-default",
         "template-docker-image": "template-docker-image",
+        "template-minimal": "template-minimal",
         "treefmt-nix": "treefmt-nix"
       }
     },
@@ -52,6 +53,22 @@
       },
       "original": {
         "path": "./docker-image",
+        "type": "path"
+      },
+      "parent": []
+    },
+    "template-minimal": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "path": "./minimal",
+        "type": "path"
+      },
+      "original": {
+        "path": "./minimal",
         "type": "path"
       },
       "parent": []
