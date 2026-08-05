@@ -12,6 +12,34 @@ kept in one repository so they can be initialised with a single
 | `docker-image` | Starter flake for [argunix](https://argunix.nix-consulting.net)-compatible OCI images. Linux-only (`x86_64-linux`, `aarch64-linux`). Defines the same `hello` image twice — once against glibc, once musl-static — to demonstrate how small Nix-built images can get. Comes with a NixOS-VM integration test (`docker load` + `docker run`), gated to `x86_64-linux`. |
 | `minimal`      | Smallest possible starter flake. Instead of an explicit system list, it maps over `nixpkgs.legacyPackages`, so it exposes its `hello` placeholder package for every system nixpkgs supports.                                                                                                                                                                          |
 
+## Which template should I use?
+
+If you are new to flakes, the choice boils down to `minimal` vs. `default`:
+
+**Start with `minimal`.** If all you need is to expose a few packages and
+possibly a devShell, this is the right template for most cases. It takes
+`nixpkgs` as it comes — no overlays, no nixpkgs configuration — and simply maps
+over `nixpkgs.legacyPackages`, which already provides a ready-made package set
+for every system. Resist the urge to reach for
+[flake-utils](https://github.com/numtide/flake-utils) or
+[flake-parts](https://github.com/hercules-ci/flake-parts): these libraries are
+good, but they are overhead you don't need at this stage.
+
+**Switch to `default` when you need to configure nixpkgs.** As soon as you
+want to change the nixpkgs config (e.g. `allowUnfree`) or apply overlays, you
+have to call `import nixpkgs { ... }` yourself — `legacyPackages` won't cut it
+anymore. The `default` template does exactly that with a small hand-rolled
+`eachSystem` helper. This is deliberately better than pulling in flake-utils
+for the same job:
+
+- it avoids yet another flake input, and
+- it is transparent about the supported architectures — the system list sits
+  right at the top of your `flake.nix`, so nobody has to search through a
+  library to find out where it is defined.
+
+The handful of extra lines of code is a better deal than an additional flake
+input whose only job is supporting multiple output systems.
+
 ## Usage
 
 In an empty directory, initialise the default starter:
