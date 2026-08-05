@@ -25,6 +25,10 @@ for every system. Resist the urge to reach for
 [flake-parts](https://github.com/hercules-ci/flake-parts): these libraries are
 good, but they are overhead you don't need at this stage.
 
+```sh
+nix flake init -t github:applicative-systems/templates#minimal
+```
+
 **Switch to `default` when you need to configure nixpkgs.** As soon as you
 want to change the nixpkgs config (e.g. `allowUnfree`) or apply overlays, you
 have to call `import nixpkgs { ... }` yourself — `legacyPackages` won't cut it
@@ -39,6 +43,10 @@ for the same job:
 
 The handful of extra lines of code is a better deal than an additional flake
 input whose only job is supporting multiple output systems.
+
+```sh
+nix flake init -t github:applicative-systems/templates#default
+```
 
 ## Usage
 
